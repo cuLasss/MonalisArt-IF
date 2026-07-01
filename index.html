@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Trabalho Prático individual</title>
+</head>
+
+<body class="travado">
+    <!-- ===== PORTÃO: pede a chave do Gemini antes de liberar o app ===== -->
+    <div id="portao">
+        <div class="portao-card">
+            <h1>MonalisArt 🖼️</h1>
+            <p>Este app usa a IA do Gemini. Cole sua chave da API para entrar — ela fica só no seu navegador, nunca no código do site.</p>
+            <input type="password" id="inputChave" placeholder="Cole sua chave da API do Gemini">
+            <button id="botaoEntrar">Entrar</button>
+            <p id="portaoErro" class="portao-erro"></p>
+            <a class="portao-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Não tem chave? Pegue de graça no Google AI Studio →</a>
+        </div>
+    </div>
+
+    <main>
+        <div class="title">
+            <h1>Trabalho Prático individual - MonalisArt</h1>
+            <h2>Autor - Lucas M.</h2>
+            <p>Explore obras reais do acervo do <strong>Metropolitan Museum (Met)</strong> — a IA explica cada uma no nível que você escolher.</p>
+        </div>
+        <div class="molde-quadro">
+            <div class="placa-esquerda">
+                <h3 class="ficha-da-obra">Ficha da obra</h3>
+                <div class="placa-conteudo" id="fichaConteudo">
+                    <!-- Preenchido via JS com os dados reais da obra (API) -->
+                </div>
+            </div>
+            <div class="moldura">
+                <div class="tela">
+                    <img class="artworks-container" id="artworksContainer" src="" alt="Obra de arte" referrerpolicy="no-referrer">
+                    <span class="tela-aviso">Aguardando a obra…</span>
+                </div>
+            </div>
+            <div class="placa-direita">
+                <h3 class="analise-da-ia">Análise da IA</h3>
+                <div class="placa-conteudo" id="analiseConteudo">
+                    <!-- Preenchido via JS com a análise do Gemini -->
+                </div>
+            </div>
+        </div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Van Gogh, Monet, sunflowers, Rembrandt, Starry..."><br><br>
+            <button id="surpriseButton">Me surpreenda!</button>
+            <div class="opcoes">
+                <label>Explicação
+                    <select id="nivel">
+                        <option value="criança">Para uma criança</option>
+                        <option value="leigo">Para leigos</option>
+                        <option value="conhecedor">Para conhecedores</option>
+                    </select>
+                </label>
+                <label>Foco
+                    <select id="foco">
+                        <option value="técnica">Técnica</option>
+                        <option value="história">História</option>
+                        <option value="curiosidades">Curiosidades</option>
+                        <option value="o que observar">O que observar</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+    </main>
+    <script src="script.js"></script>
+</body>
+
+</html>
