@@ -72,11 +72,9 @@ Acesse: **https://culasss.github.io/MonalisArt-IF/** e cole sua chave do Gemini.
 
 ## 📸 Capturas de tela
 
-<!-- Adicione 2 prints na pasta img/ com estes nomes exatos que as imagens abaixo aparecem: -->
+![Tela inicial do MonalisArt](img/tela-inicial.jpeg)
 
-![Tela inicial do MonalisArt](img/tela-inicial.png)
-
-![Obra com ficha e análise da IA](img/obra-analise.png)
+![Obra com ficha e análise da IA](img/Obra-com-ficha-e-analise-de-IA.jpeg)
 
 ## 👤 Autor
 
