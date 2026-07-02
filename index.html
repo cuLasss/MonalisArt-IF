@@ -352,30 +352,43 @@ class Component extends DCLogic {
   }
 
   // ---------- Met API ----------
+  espera(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+  // O acervo do Met fica atras do Imperva (anti-bot): sob rajada de requisicoes ele
+  // devolve 403 sem header de CORS (o navegador acusa como erro de CORS). Aqui a gente
+  // busca com ate 3 tentativas espacadas, o que costuma liberar quando e bloqueio momentaneo.
+  async metFetch(path, tent) {
+    tent = tent || 0;
+    try {
+      const r = await fetch(this.MET + path);
+      if (r.ok) return r;
+      if (tent < 2) { await this.espera(700 + tent * 700); return this.metFetch(path, tent + 1); }
+      throw new Error('met ' + r.status);
+    } catch (e) {
+      if (tent < 2) { await this.espera(700 + tent * 700); return this.metFetch(path, tent + 1); }
+      throw e;
+    }
+  }
   async metSearch(termo) {
-    const r = await fetch(this.MET + '/search?q=' + encodeURIComponent(termo) + '&hasImages=true');
+    const r = await this.metFetch('/search?q=' + encodeURIComponent(termo) + '&hasImages=true');
     if (!r.ok) throw new Error('met');
     const d = await r.json();
     return d.objectIDs || [];
   }
   async fetchObj(id) {
     if (this.objCache.has(id)) return this.objCache.get(id);
-    const r = await fetch(this.MET + '/objects/' + id);
+    const r = await this.metFetch('/objects/' + id);
     if (!r.ok) throw new Error('obj');
     const o = await r.json();
     this.objCache.set(id, o);
     return o;
   }
-  // Varre a lista em lotes paralelos de 6 até achar uma obra com imagem.
+  // Varre a lista UMA obra por vez (sem paralelismo) ate achar uma com imagem.
+  // Requisicoes sequenciais nao disparam o anti-bot do Met como as rajadas de 6 disparavam.
   async acharComImagem(ids, from) {
-    const fim = Math.min(ids.length, from + 36);
-    for (let i = from; i < fim; i += 6) {
-      const lote = ids.slice(i, i + 6);
-      const objs = await Promise.all(lote.map(id => this.fetchObj(id).catch(() => null)));
-      for (let j = 0; j < objs.length; j++) {
-        const o = objs[j];
-        if (o && o.primaryImageSmall) return { obra: o, prox: i + j + 1 };
-      }
+    const fim = Math.min(ids.length, from + 24);
+    for (let i = from; i < fim; i++) {
+      const o = await this.fetchObj(ids[i]).catch(() => null);
+      if (o && o.primaryImageSmall) return { obra: o, prox: i + 1 };
     }
     return null;
   }
@@ -431,7 +444,7 @@ class Component extends DCLogic {
         if (!ids.length) continue;
         const usado = new Set();
         const amostra = [];
-        const alvo = Math.min(18, ids.length);
+        const alvo = Math.min(12, ids.length);
         let guarda = 0;
         while (amostra.length < alvo && guarda < 300) {
           guarda++;
