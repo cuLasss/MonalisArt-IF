@@ -1,76 +1,813 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Trabalho Prático individual</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
 </head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&amp;family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;display=swap" rel="stylesheet">
+<style>
+html, body { margin: 0; padding: 0; background: #191c17; }
+* { box-sizing: border-box; }
+@keyframes maShimmer { 0% { background-position: 130% 0; } 100% { background-position: -130% 0; } }
+@keyframes maFadeUp { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes maSpin { to { transform: rotate(360deg); } }
+::selection { background: #cfa964; color: #201607; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: #3a3e35; border-radius: 6px; border: 2px solid #191c17; }
+::-webkit-scrollbar-track { background: transparent; }
+@media (min-width: 921px) {
+  [data-ma-app] { height: 100vh !important; overflow: hidden !important; }
+}
+@media (max-width: 920px) {
+  [data-ma-rail] { flex-direction: column !important; align-items: center !important; gap: 24px !important; }
+  [data-ma-frame] { order: 1 !important; width: min(88vw, 400px) !important; }
+  [data-ma-p="ficha"] { order: 2 !important; }
+  [data-ma-p="analise"] { order: 3 !important; }
+  [data-ma-p] { width: 100% !important; max-width: 480px !important; min-width: 0 !important; flex: 0 0 auto !important; }
+  [data-ma-pc] { max-height: 300px !important; }
+  [data-ma-cmpgrid] { grid-template-columns: 1fr !important; }
+}
+</style>
+</helmet>
+<!--
+  MonalisArt v3 — "Salão sóbrio" (meio-termo entre v1 dourada e v2 minimalista)
+  Parede carvão-esverdeada com trama sutil, latão flat só em detalhes, moldura de nogueira com
+  filete de latão, tipografia maior e mais contrastada. Desktop trava em 100vh (zero scroll).
+  Mesma lógica: fetch paralelo, cancelamento, caches, skeleton, histórico, zoom, comparar, visitante.
+-->
+<div data-ma-app data-screen-label="Salão principal" style="position: relative; min-height: 100vh; font-family: 'Lora', Georgia, serif; color: #f0e9d8; overflow-x: hidden; background: #191c17; display: flex; flex-direction: column;">
+  <div style="{{ paredeFundo }}"></div>
+  <div style="position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 95% 55% at 50% 112%, rgba(0,0,0,0.5), transparent 60%);"></div>
+  <div style="{{ spotStyle }}"></div>
 
-<body class="travado">
-    <!-- ===== PORTÃO: pede a chave do Gemini antes de liberar o app ===== -->
-    <div id="portao">
-        <div class="portao-card">
-            <h1>MonalisArt 🖼️</h1>
-            <p>Este app usa a IA do Gemini. Cole sua chave da API para entrar — ela fica só no seu navegador, nunca no código do site.</p>
-            <input type="password" id="inputChave" placeholder="Cole sua chave da API do Gemini">
-            <button id="botaoEntrar">Entrar</button>
-            <p id="portaoErro" class="portao-erro"></p>
-            <a class="portao-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Não tem chave? Pegue de graça no Google AI Studio →</a>
+  <div style="position: relative; z-index: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; flex-direction: column; flex: 1; min-height: 0;">
+
+    <header style="text-align: center; padding: 20px 10px 4px; flex: 0 0 auto;">
+      <h1 style="margin: 0; font-family: 'Playfair Display', serif; font-weight: 600; font-size: clamp(22px, 2.8vw, 30px); letter-spacing: 0.3em; color: #f0e9d8; text-indent: 0.3em;">MONALISART</h1>
+      <div style="margin-top: 3px; font-style: italic; font-size: 12.5px; color: #b6a988;">Acervo do Metropolitan Museum of Art</div>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 11px; margin: 10px auto 0; max-width: 320px;">
+        <div style="height: 1px; flex: 1; background: rgba(207,169,100,0.35);"></div>
+        <div style="width: 5px; height: 5px; transform: rotate(45deg); background: #cfa964;"></div>
+        <div style="height: 1px; flex: 1; background: rgba(207,169,100,0.35);"></div>
+      </div>
+    </header>
+
+    <div data-ma-rail style="display: flex; align-items: stretch; justify-content: center; gap: 30px; padding: 16px 0 4px; width: 100%; flex: 1 1 auto; min-height: 0;">
+
+      <aside data-ma-p="ficha" style="order: 1; flex: 1 1 245px; min-width: 230px; max-width: 300px; display: flex; flex-direction: column; min-height: 0; border-radius: 6px; border: 1px solid rgba(207,169,100,0.24); border-top: 2px solid rgba(207,169,100,0.55); background: rgba(244,236,214,0.04); box-shadow: 0 12px 32px rgba(0,0,0,0.35);">
+        <div style="margin: 13px 16px 0; padding-bottom: 9px; border-bottom: 1px solid rgba(207,169,100,0.2); font-size: 11px; font-weight: 600; letter-spacing: 0.3em; color: #cfa964;">FICHA DA OBRA</div>
+        <div data-ma-pc style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 13px 16px 14px; font-size: 14.5px; line-height: 1.6;">
+          <sc-if value="{{ fichaEsqueleto }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 11px; padding-top: 4px;">
+              <div style="height: 19px; width: 82%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="height: 12px; width: 95%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="height: 12px; width: 70%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="height: 12px; width: 88%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="height: 12px; width: 58%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ fichaVazia }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 4px 0; font-style: italic; color: #b6a988;">Busque uma obra no acervo ou peça uma surpresa — a ficha aparece aqui.</p>
+          </sc-if>
+          <sc-if value="{{ temObra }}" hint-placeholder-val="{{ false }}">
+            <h2 style="margin: 2px 0 11px; font-family: 'Playfair Display', serif; font-weight: 600; font-style: italic; font-size: 19.5px; line-height: 1.3; color: #f5eedb; text-wrap: pretty;">{{ tituloObra }}</h2>
+            <sc-for list="{{ fichaRows }}" as="row" hint-placeholder-count="0">
+              <div style="margin: 0 0 10px;">
+                <div style="font-size: 10px; letter-spacing: 0.22em; color: #cfa964; font-weight: 600;">{{ row.k }}</div>
+                <div style="color: #e9dfc6;">{{ row.v }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ temMetUrl }}" hint-placeholder-val="{{ false }}">
+              <a href="{{ metUrl }}" target="_blank" rel="noopener" style="display: inline-block; margin-top: 5px; font-size: 12.5px; letter-spacing: 0.05em; color: #dcb672; text-decoration: none; border-bottom: 1px solid rgba(220,182,114,0.45); padding-bottom: 1px;" style-hover="color: #f0d29a; border-bottom-color: #f0d29a;">Ver no acervo do Met ↗</a>
+            </sc-if>
+          </sc-if>
         </div>
+      </aside>
+
+      <div data-ma-frame style="order: 2; flex: 0 0 auto; width: clamp(260px, min(30vw, calc((100vh - 460px) * 0.8)), 430px); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 0;">
+        <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); width: 130%; height: 70%; background: radial-gradient(ellipse 52% 50% at 50% 26%, rgba(226,196,138,0.1), transparent 70%); pointer-events: none;"></div>
+        <div style="position: relative; width: 100%; padding: clamp(10px, 1.2vw, 14px); border-radius: 3px; background: linear-gradient(150deg, #33261a 0%, #241a11 55%, #2e2216 100%); border: 1px solid rgba(0,0,0,0.5); box-shadow: 0 22px 52px rgba(0,0,0,0.5), 0 6px 16px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(207,169,100,0.5);">
+          <div style="position: relative; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f3ecda; box-shadow: inset 0 0 0 1px rgba(38,30,15,0.15), inset 0 0 22px rgba(50,38,15,0.14);">
+            <sc-if value="{{ temImg }}" hint-placeholder-val="{{ false }}">
+              <div role="img" aria-label="{{ tituloObra }}" onClick="{{ abrirZoom }}" style="{{ imgStyle }}"></div>
+            </sc-if>
+            <sc-if value="{{ mostrarAviso }}" hint-placeholder-val="{{ false }}">
+              <span style="position: absolute; color: #8f815f; font-style: italic; font-size: 14px; text-align: center; padding: 0 24px;">A galeria aguarda a primeira obra…</span>
+            </sc-if>
+            <div style="{{ veilStyle }}"></div>
+            <sc-if value="{{ buscando }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; background: rgba(22,24,19,0.88); border: 1px solid rgba(207,169,100,0.4); font-size: 11px; letter-spacing: 0.14em; color: #ddc794;">
+                <span style="width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(207,169,100,0.25); border-top-color: #cfa964; animation: maSpin 0.9s linear infinite; display: inline-block;"></span>
+                PENDURANDO A OBRA…
+              </div>
+            </sc-if>
+            <sc-if value="{{ temImg }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ abrirZoom }}" title="Ampliar em alta resolução" style="position: absolute; top: 10px; right: 10px; width: 31px; height: 31px; border-radius: 3px; border: 1px solid rgba(60,48,20,0.35); background: rgba(243,236,218,0.88); color: #4a3d22; font-size: 15px; line-height: 1; cursor: zoom-in; display: flex; align-items: center; justify-content: center;" style-hover="background: #f3ecda; border-color: #a3814a; color: #a3814a;">⤢</button>
+            </sc-if>
+          </div>
+        </div>
+        <sc-if value="{{ temObra }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width: 92%; text-align: center; flex: 0 0 auto;">
+            <div style="font-size: 12.5px; font-weight: 600; letter-spacing: 0.14em; color: #f0e9d8;">{{ plateTitulo }}</div>
+            <div style="font-size: 11.5px; font-style: italic; color: #b6a988; margin-top: 2px;">{{ plateSub }}</div>
+          </div>
+        </sc-if>
+      </div>
+
+      <aside data-ma-p="analise" style="order: 3; flex: 1 1 245px; min-width: 230px; max-width: 300px; display: flex; flex-direction: column; min-height: 0; border-radius: 6px; border: 1px solid rgba(207,169,100,0.24); border-top: 2px solid rgba(207,169,100,0.55); background: rgba(244,236,214,0.04); box-shadow: 0 12px 32px rgba(0,0,0,0.35);">
+        <div style="margin: 13px 16px 0; padding-bottom: 9px; border-bottom: 1px solid rgba(207,169,100,0.2); display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+          <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.3em; color: #cfa964;">ANÁLISE DA IA</div>
+          <button onClick="{{ aoComparar }}" disabled="{{ compararDesabilitado }}" title="Comparar explicação para criança × conhecedor" style="border: none; background: transparent; padding: 0; font-family: 'Lora', serif; font-size: 11px; letter-spacing: 0.1em; color: #b6a988; cursor: pointer; border-bottom: 1px solid rgba(207,169,100,0.3);" style-hover="color: #dcb672; border-bottom-color: #dcb672;">níveis ⇄</button>
+        </div>
+        <div data-ma-pc style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 13px 16px 10px; font-size: 14.5px; line-height: 1.68;">
+          <sc-if value="{{ analiseEsqueleto }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; gap: 11px; padding-top: 4px;">
+              <div style="height: 12px; width: 96%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="height: 12px; width: 88%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="height: 12px; width: 93%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="height: 12px; width: 62%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+              <div style="margin-top: 2px; font-size: 11.5px; font-style: italic; color: #b6a988;">O guia está observando a obra…</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ temAnalise }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 2px 0 0; white-space: pre-line; color: #e9dfc6; text-wrap: pretty;">{{ analysisTexto }}</p>
+          </sc-if>
+          <sc-if value="{{ analiseVazia }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 4px 0; font-style: italic; color: #b6a988;">Quando uma obra estiver na parede, o guia comenta aqui — no nível e no foco que você escolher.</p>
+          </sc-if>
+          <sc-if value="{{ analiseSemIA }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 4px 0; font-style: italic; color: #b6a988;">Você entrou como visitante — sem chave da IA, a análise fica muda.</p>
+            <button onClick="{{ abrirPortaoNovamente }}" style="margin-top: 8px; padding: 8px 14px; border-radius: 3px; border: 1px solid rgba(207,169,100,0.45); background: transparent; color: #dcb672; font-family: 'Lora', serif; font-size: 12.5px; letter-spacing: 0.06em; cursor: pointer;" style-hover="background: rgba(207,169,100,0.12);">Inserir chave do Gemini</button>
+          </sc-if>
+          <sc-if value="{{ analiseErroGen }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 4px 0; font-style: italic; color: #d8a08e;">O guia pigarreou e se perdeu — a análise falhou.</p>
+            <button onClick="{{ tentarAnalise }}" style="margin-top: 8px; padding: 8px 14px; border-radius: 3px; border: 1px solid rgba(207,169,100,0.45); background: transparent; color: #dcb672; font-family: 'Lora', serif; font-size: 12.5px; letter-spacing: 0.06em; cursor: pointer;" style-hover="background: rgba(207,169,100,0.12);">Tentar novamente</button>
+          </sc-if>
+        </div>
+        <div style="padding: 8px 16px 11px; display: flex; justify-content: space-between; gap: 8px; font-size: 10.5px; letter-spacing: 0.08em; color: #b6a988; border-top: 1px solid rgba(207,169,100,0.16);">
+          <span>{{ nivelFocoLabel }}</span>
+          <span style="color: #cfa964;">{{ provedorLabel }}</span>
+        </div>
+      </aside>
     </div>
 
-    <main>
-        <div class="title">
-            <h1>Trabalho Prático individual - MonalisArt</h1>
-            <h2>Autor - Lucas M.</h2>
-            <p>Explore obras reais do acervo do <strong>Metropolitan Museum (Met)</strong> — a IA explica cada uma no nível que você escolher.</p>
-        </div>
-        <div class="molde-quadro">
-            <div class="placa-esquerda">
-                <h3 class="ficha-da-obra">Ficha da obra</h3>
-                <div class="placa-conteudo" id="fichaConteudo">
-                    <!-- Preenchido via JS com os dados reais da obra (API) -->
-                </div>
-            </div>
-            <div class="moldura">
-                <div class="tela">
-                    <img class="artworks-container" id="artworksContainer" src="" alt="Obra de arte" referrerpolicy="no-referrer">
-                    <span class="tela-aviso">Aguardando a obra…</span>
-                </div>
-            </div>
-            <div class="placa-direita">
-                <h3 class="analise-da-ia">Análise da IA</h3>
-                <div class="placa-conteudo" id="analiseConteudo">
-                    <!-- Preenchido via JS com a análise do Gemini -->
-                </div>
-            </div>
-        </div>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Van Gogh, Monet, sunflowers, Rembrandt, Starry..."><br><br>
-            <button id="surpriseButton">Me surpreenda!</button>
-            <div class="opcoes">
-                <label>Explicação
-                    <select id="nivel">
-                        <option value="criança">Para uma criança</option>
-                        <option value="leigo">Para leigos</option>
-                        <option value="conhecedor">Para conhecedores</option>
-                    </select>
-                </label>
-                <label>Foco
-                    <select id="foco">
-                        <option value="técnica">Técnica</option>
-                        <option value="história">História</option>
-                        <option value="curiosidades">Curiosidades</option>
-                        <option value="o que observar">O que observar</option>
-                    </select>
-                </label>
-            </div>
-        </div>
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 14px; padding: 16px 0 4px; flex: 0 0 auto;">
+      <input value="{{ searchTerm }}" onChange="{{ aoDigitarBusca }}" onKeyDown="{{ aoTeclaBusca }}" placeholder="Busque no acervo: Van Gogh, Monet, samurai…" style="width: min(340px, 90vw); padding: 10px 4px; text-align: center; font-family: 'Lora', serif; font-size: 15px; font-style: italic; color: #f0e9d8; background: transparent; border: none; border-bottom: 1px solid rgba(207,169,100,0.45); outline: none; transition: border-color 0.2s ease;" style-focus="border-bottom-color: #dcb672;">
+      <button onClick="{{ aoSurpresa }}" disabled="{{ buscando }}" style="padding: 11px 24px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.4); background: #bd9a5c; color: #201607; font-family: 'Lora', serif; font-size: 12.5px; font-weight: 600; letter-spacing: 0.18em; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.35); transition: background 0.15s ease;" style-hover="background: #cfa964;" style-active="transform: translateY(1px);">
+        <sc-if value="{{ naoBuscando }}" hint-placeholder-val="{{ true }}">ME SURPREENDA</sc-if>
+        <sc-if value="{{ buscando }}" hint-placeholder-val="{{ false }}">SORTEANDO…</sc-if>
+      </button>
+      <sc-if value="{{ temMais }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ aoOutra }}" disabled="{{ buscando }}" style="padding: 11px 16px; border-radius: 3px; border: 1px solid rgba(207,169,100,0.4); background: transparent; color: #d9c9a2; font-family: 'Lora', serif; font-size: 12.5px; letter-spacing: 0.08em; cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease;" style-hover="border-color: #dcb672; color: #dcb672;">outra desta busca ↻</button>
+      </sc-if>
+      <label style="display: flex; flex-direction: column; gap: 4px; font-size: 9.5px; letter-spacing: 0.24em; color: #b6a988;">EXPLICAÇÃO
+        <select value="{{ nivel }}" onChange="{{ aoMudarNivel }}" style="padding: 9px 10px; border-radius: 3px; font-family: 'Lora', serif; font-size: 13.5px; color: #ede4cd; background: #20241e; border: 1px solid rgba(207,169,100,0.3); cursor: pointer; outline: none;">
+          <option value="criança">Para uma criança</option>
+          <option value="leigo">Para leigos</option>
+          <option value="conhecedor">Para conhecedores</option>
+        </select>
+      </label>
+      <label style="display: flex; flex-direction: column; gap: 4px; font-size: 9.5px; letter-spacing: 0.24em; color: #b6a988;">FOCO
+        <select value="{{ foco }}" onChange="{{ aoMudarFoco }}" style="padding: 9px 10px; border-radius: 3px; font-family: 'Lora', serif; font-size: 13.5px; color: #ede4cd; background: #20241e; border: 1px solid rgba(207,169,100,0.3); cursor: pointer; outline: none;">
+          <option value="técnica">Técnica</option>
+          <option value="história">História</option>
+          <option value="curiosidades">Curiosidades</option>
+          <option value="o que observar">O que observar</option>
+        </select>
+      </label>
+    </div>
 
-    </main>
-    <script src="script.js"></script>
+    <sc-if value="{{ temHistoria }}" hint-placeholder-val="{{ false }}">
+      <div style="padding: 8px 0 0; display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto;">
+        <div style="font-size: 8.5px; letter-spacing: 0.3em; color: #8f815f;">VISITADAS NESTA SESSÃO</div>
+        <div style="display: flex; gap: 9px; max-width: 100%; overflow-x: auto; padding: 3px 8px 6px;">
+          <sc-for list="{{ historia }}" as="h" hint-placeholder-count="0">
+            <button onClick="{{ h.click }}" title="{{ h.titulo }}" style="{{ h.estilo }}">
+              <div role="img" aria-label="{{ h.titulo }}" style="{{ h.bg }}"></div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <footer style="margin-top: auto; text-align: center; padding: 8px 10px 12px; font-size: 10.5px; color: #8f815f; letter-spacing: 0.04em; flex: 0 0 auto;">
+      Obras via Met Museum API · análises por IA · feito por <a href="https://github.com/cuLasss/MonalisArt-IF" target="_blank" rel="noopener" style="color: #b99354; text-decoration: none; border-bottom: 1px solid rgba(185,147,84,0.4);" style-hover="color: #dcb672;">Lucas M.</a>
+      <sc-if value="{{ temSessao }}" hint-placeholder-val="{{ false }}">
+        <span> · </span>
+        <button onClick="{{ aoSair }}" title="Apaga a chave/modo salvos neste navegador e volta à bilheteria" style="border: none; background: transparent; padding: 0; font-family: 'Lora', serif; font-size: 10.5px; letter-spacing: 0.04em; color: #8f815f; cursor: pointer; border-bottom: 1px solid rgba(143,129,95,0.4);" style-hover="color: #dcb672; border-bottom-color: #dcb672;">remover chave deste navegador</button>
+      </sc-if>
+    </footer>
+  </div>
+
+  <sc-if value="{{ mostrarPortao }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Bilheteria" style="{{ portaoOverlayStyle }}">
+      <div style="{{ portaoCardAnim }}">
+        <div style="position: relative; padding: 34px 32px 26px; text-align: center; background: #1d211b; border: 1px solid rgba(207,169,100,0.3); border-top: 2px solid rgba(207,169,100,0.6); border-radius: 6px; box-shadow: 0 30px 70px rgba(0,0,0,0.6);">
+          <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.34em; color: #cfa964;">BILHETERIA</div>
+          <h1 style="margin: 12px 0 6px; font-family: 'Playfair Display', serif; font-weight: 600; font-size: 24px; letter-spacing: 0.26em; color: #f0e9d8; text-indent: 0.26em;">MONALISART</h1>
+          <p style="margin: 0 auto 20px; max-width: 310px; font-size: 13.5px; line-height: 1.6; color: #c4b795;">A galeria usa a IA do Gemini para comentar as obras do Met. Apresente sua chave para entrar.</p>
+          <div style="text-align: left; border-radius: 6px; overflow: hidden; background: #f3ecda; box-shadow: 0 10px 26px rgba(0,0,0,0.4);">
+            <div style="padding: 12px 18px 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+              <div style="font-family: 'Playfair Display', serif; font-size: 16.5px; font-weight: 700; color: #241b0d;">Bilhete de entrada</div>
+              <div style="font-size: 9px; letter-spacing: 0.2em; color: #96742f; font-weight: 700;">ADMITE · 1</div>
+            </div>
+            <div style="position: relative; border-top: 2px dashed rgba(102,79,36,0.35); padding: 12px 18px 16px;">
+              <div style="position: absolute; top: -10px; left: -10px; width: 20px; height: 20px; border-radius: 50%; background: #1d211b;"></div>
+              <div style="position: absolute; top: -10px; right: -10px; width: 20px; height: 20px; border-radius: 50%; background: #1d211b;"></div>
+              <div style="font-size: 9.5px; letter-spacing: 0.22em; color: #7a6335; font-weight: 700; margin-bottom: 6px;">CHAVE DA API GEMINI</div>
+              <input type="password" value="{{ keyInput }}" onChange="{{ aoDigitarChave }}" onKeyDown="{{ aoTeclaChave }}" placeholder="Cole a chave aqui" style="width: 100%; padding: 11px 12px; font-family: 'Lora', serif; font-size: 14px; color: #241b0d; background: #fffdf6; border: 1px solid rgba(150,116,47,0.4); border-radius: 4px; outline: none;" style-focus="border-color: #96742f;">
+              <button onClick="{{ aoEntrar }}" disabled="{{ validando }}" style="width: 100%; margin-top: 10px; padding: 12px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.4); background: #bd9a5c; color: #201607; font-family: 'Lora', serif; font-size: 12.5px; font-weight: 600; letter-spacing: 0.2em; cursor: pointer;" style-hover="background: #cfa964;" style-active="transform: translateY(1px);">
+                <sc-if value="{{ naoValidando }}" hint-placeholder-val="{{ true }}">VALIDAR ENTRADA</sc-if>
+                <sc-if value="{{ validando }}" hint-placeholder-val="{{ false }}">CARIMBANDO O BILHETE…</sc-if>
+              </button>
+              <div style="margin-top: 9px; font-size: 10.5px; font-style: italic; color: #8a744a;">A chave fica somente no seu navegador — nunca vai para o código do site.</div>
+            </div>
+          </div>
+          <div style="min-height: 18px; margin-top: 12px; font-size: 12.5px; color: #e0988a;">{{ keyError }}</div>
+          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 20px; margin-top: 4px; font-size: 12.5px;">
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color: #dcb672; text-decoration: none; border-bottom: 1px solid rgba(220,182,114,0.4);" style-hover="color: #f0d29a;">Pegar chave grátis ↗</a>
+            <button onClick="{{ aoVisitante }}" style="border: none; background: transparent; padding: 0; font-family: 'Lora', serif; font-size: 12.5px; color: #b6a988; cursor: pointer; border-bottom: 1px solid rgba(182,169,136,0.4);" style-hover="color: #dcb672; border-bottom-color: #dcb672;">Entrar como visitante →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ zoomAberto }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Obra ampliada" onClick="{{ fecharZoom }}" style="position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 30px 20px; background: radial-gradient(ellipse at 50% 36%, rgba(20,22,17,0.93), rgba(6,7,5,0.98)); cursor: zoom-out;">
+      <div role="img" aria-label="{{ tituloObra }}" onClick="{{ cliqueZoomImg }}" style="{{ zoomImgStyle }}"></div>
+      <div style="font-size: 12.5px; letter-spacing: 0.06em; color: #cbbd9d; font-style: italic; text-align: center; max-width: 80vw;">{{ zoomLegenda }}</div>
+      <button onClick="{{ fecharZoom }}" title="Fechar (Esc)" style="position: absolute; top: 18px; right: 22px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(207,169,100,0.45); background: rgba(24,26,21,0.7); color: #e5cc96; font-size: 16px; cursor: pointer;" style-hover="background: rgba(44,48,38,0.9);">✕</button>
+      <sc-if value="{{ zoomCarregandoAlta }}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; top: 24px; left: 26px; display: flex; align-items: center; gap: 8px; font-size: 10.5px; letter-spacing: 0.18em; color: #b7a173;">
+          <span style="width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(207,169,100,0.25); border-top-color: #cfa964; animation: maSpin 0.9s linear infinite; display: inline-block;"></span>
+          ALTA RESOLUÇÃO…
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ compareAberto }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Comparação de níveis" onClick="{{ fecharCompare }}" style="position: fixed; inset: 0; z-index: 75; display: flex; align-items: center; justify-content: center; padding: 24px 18px; background: rgba(8,9,7,0.78); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+      <div onClick="{{ pararClique }}" style="width: min(860px, 96vw); max-height: 88vh; overflow-y: auto; padding: 24px 28px 28px; background: #1d211b; border: 1px solid rgba(207,169,100,0.3); border-top: 2px solid rgba(207,169,100,0.6); border-radius: 6px; box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+          <h2 style="margin: 0; font-family: 'Playfair Display', serif; font-style: italic; font-weight: 600; font-size: 21px; color: #f0e9d8;">Dois olhares sobre a obra</h2>
+          <button onClick="{{ fecharCompare }}" title="Fechar (Esc)" style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(207,169,100,0.4); background: transparent; color: #e5cc96; font-size: 14px; cursor: pointer; flex: 0 0 auto;" style-hover="background: rgba(207,169,100,0.14);">✕</button>
+        </div>
+        <div style="font-size: 11.5px; letter-spacing: 0.08em; color: #b6a988; margin: 5px 0 18px;">{{ compareLegenda }}</div>
+        <div data-ma-cmpgrid style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <sc-for list="{{ compareCols }}" as="c" hint-placeholder-count="2">
+            <div style="border-top: 1px solid rgba(207,169,100,0.3); padding-top: 11px;">
+              <div style="font-size: 10px; font-weight: 600; letter-spacing: 0.28em; color: #cfa964; margin-bottom: 10px;">{{ c.titulo }}</div>
+              <div style="font-size: 14px; line-height: 1.66; color: #e9dfc6;">
+                <sc-if value="{{ c.carregando }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="height: 11px; width: 95%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+                    <div style="height: 11px; width: 80%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+                    <div style="height: 11px; width: 90%; border-radius: 3px; background: linear-gradient(90deg, rgba(240,230,205,0.07) 30%, rgba(240,230,205,0.15) 50%, rgba(240,230,205,0.07) 70%); background-size: 220% 100%; animation: maShimmer 1.5s linear infinite;"></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ c.pronto }}" hint-placeholder-val="{{ false }}">
+                  <p style="margin: 0; white-space: pre-line; text-wrap: pretty;">{{ c.texto }}</p>
+                </sc-if>
+                <sc-if value="{{ c.erro }}" hint-placeholder-val="{{ false }}">
+                  <p style="margin: 0; font-style: italic; color: #d8a08e;">Não consegui esta análise — feche e tente de novo.</p>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ temToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 90; padding: 10px 22px; border-radius: 4px; border: 1px solid rgba(207,169,100,0.45); background: rgba(22,24,19,0.96); color: #ecdfc0; font-size: 13px; font-style: italic; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: maFadeUp 0.35s ease; max-width: 88vw; text-align: center;">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;tomDaParede&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;carvao-verde&quot;,&quot;carvao-quente&quot;,&quot;grafite&quot;],&quot;default&quot;:&quot;carvao-quente&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Ambiente&quot;},&quot;spotlight&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;default&quot;:0.9,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Ambiente&quot;},&quot;transicoesTeatrais&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Comportamento&quot;}}">
+class Component extends DCLogic {
+  state = {
+    phase: 'gate', // gate | opening | hall
+    keyInput: '', keyError: '', validating: false,
+    geminiKey: '', demo: false,
+    searchTerm: '', nivel: 'leigo', foco: 'história',
+    obra: null, imgSrc: '', imgVisible: false, busy: false,
+    analysis: '', analysisLoading: false, analysisErro: '',
+    lastIds: [], lastCursor: 0, lastTermo: '',
+    history: [],
+    zoom: false, zoomSrc: '', zoomBlur: true, zoomScale: 1, zoomOrigin: '50% 50%',
+    compare: false, cmpA: '', cmpAL: false, cmpAE: false, cmpB: '', cmpBL: false, cmpBE: false,
+    toast: ''
+  };
+
+  MET = 'https://collectionapi.metmuseum.org/public/collection/v1';
+  MODEL = 'gemini-2.5-flash-lite';
+  reqToken = 0;
+  anToken = 0;
+  objCache = new Map();
+  anCache = new Map();
+
+  componentDidMount() {
+    this._esc = (e) => { if (e.key === 'Escape') this.setState({ zoom: false, compare: false }); };
+    window.addEventListener('keydown', this._esc);
+    try {
+      const k = localStorage.getItem('ma_gemini_key') || '';
+      const demo = localStorage.getItem('ma_demo') === '1';
+      if (k || demo) {
+        this.setState({ geminiKey: k, demo: demo, phase: 'hall' });
+        setTimeout(() => { if (!this.state.obra) this.surpresa(); }, 350);
+      }
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._esc);
+    clearTimeout(this._toastT);
+  }
+
+  teatral() { return this.props.transicoesTeatrais ?? true; }
+  avisar(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => this.setState({ toast: '' }), 4200);
+  }
+
+  // ---------- Met API ----------
+  async metSearch(termo) {
+    const r = await fetch(this.MET + '/search?q=' + encodeURIComponent(termo) + '&hasImages=true');
+    if (!r.ok) throw new Error('met');
+    const d = await r.json();
+    return d.objectIDs || [];
+  }
+  async fetchObj(id) {
+    if (this.objCache.has(id)) return this.objCache.get(id);
+    const r = await fetch(this.MET + '/objects/' + id);
+    if (!r.ok) throw new Error('obj');
+    const o = await r.json();
+    this.objCache.set(id, o);
+    return o;
+  }
+  // Varre a lista em lotes paralelos de 6 até achar uma obra com imagem.
+  async acharComImagem(ids, from) {
+    const fim = Math.min(ids.length, from + 36);
+    for (let i = from; i < fim; i += 6) {
+      const lote = ids.slice(i, i + 6);
+      const objs = await Promise.all(lote.map(id => this.fetchObj(id).catch(() => null)));
+      for (let j = 0; j < objs.length; j++) {
+        const o = objs[j];
+        if (o && o.primaryImageSmall) return { obra: o, prox: i + j + 1 };
+      }
+    }
+    return null;
+  }
+
+  async buscar(termo) {
+    if (!termo || this.state.busy) return;
+    const token = ++this.reqToken;
+    this.setState({ busy: true, toast: '' });
+    try {
+      const ids = (await this.metSearch(termo)).slice(0, 160);
+      if (token !== this.reqToken) return;
+      if (!ids.length) { this.setState({ busy: false }); this.avisar('Nenhuma obra encontrada para "' + termo + '".'); return; }
+      const hit = await this.acharComImagem(ids, 0);
+      if (token !== this.reqToken) return;
+      if (!hit) { this.setState({ busy: false }); this.avisar('Só achei obras sem imagem para "' + termo + '". Tente outro termo.'); return; }
+      this.setState({ lastIds: ids, lastCursor: hit.prox, lastTermo: termo });
+      this.mostrarObra(hit.obra, token);
+    } catch (e) {
+      if (token === this.reqToken) { this.setState({ busy: false }); this.avisar('O acervo do Met não respondeu. Tente de novo.'); }
+    }
+  }
+
+  async outra() {
+    const { lastIds, lastCursor } = this.state;
+    if (this.state.busy || !lastIds.length) return;
+    const token = ++this.reqToken;
+    this.setState({ busy: true });
+    try {
+      let hit = await this.acharComImagem(lastIds, lastCursor);
+      if (token !== this.reqToken) return;
+      if (!hit && lastCursor > 0) {
+        hit = await this.acharComImagem(lastIds, 0);
+        if (token !== this.reqToken) return;
+      }
+      if (!hit) { this.setState({ busy: false }); this.avisar('Acabaram as obras desta busca.'); return; }
+      this.setState({ lastCursor: hit.prox });
+      this.mostrarObra(hit.obra, token);
+    } catch (e) {
+      if (token === this.reqToken) { this.setState({ busy: false }); this.avisar('O acervo do Met não respondeu.'); }
+    }
+  }
+
+  async surpresa() {
+    if (this.state.busy) return;
+    const token = ++this.reqToken;
+    this.setState({ busy: true, toast: '' });
+    const termos = ['impressionism', 'portrait', 'landscape', 'flowers', 'mythology', 'armor', 'gold', 'sea', 'night', 'garden', 'dutch painting', 'japanese', 'egyptian', 'still life', 'renaissance'];
+    try {
+      for (let tent = 0; tent < 3; tent++) {
+        const termo = termos[(Math.random() * termos.length) | 0];
+        const ids = await this.metSearch(termo);
+        if (token !== this.reqToken) return;
+        if (!ids.length) continue;
+        const usado = new Set();
+        const amostra = [];
+        const alvo = Math.min(18, ids.length);
+        let guarda = 0;
+        while (amostra.length < alvo && guarda < 300) {
+          guarda++;
+          const ix = (Math.random() * ids.length) | 0;
+          if (!usado.has(ix)) { usado.add(ix); amostra.push(ids[ix]); }
+        }
+        const hit = await this.acharComImagem(amostra, 0);
+        if (token !== this.reqToken) return;
+        if (hit) {
+          this.setState({ lastIds: [], lastCursor: 0, lastTermo: '' });
+          this.mostrarObra(hit.obra, token);
+          return;
+        }
+      }
+      this.setState({ busy: false });
+      this.avisar('O sorteio emperrou — tente de novo!');
+    } catch (e) {
+      if (token === this.reqToken) { this.setState({ busy: false }); this.avisar('O acervo do Met não respondeu.'); }
+    }
+  }
+
+  mostrarObra(obra, token) {
+    this.setState({ obra: obra, imgVisible: false, busy: true, toast: '' });
+    const img = new Image();
+    img.referrerPolicy = 'no-referrer';
+    img.onload = () => {
+      if (token !== this.reqToken) return;
+      this.setState({ imgSrc: obra.primaryImageSmall, busy: false });
+      setTimeout(() => { if (token === this.reqToken) this.setState({ imgVisible: true }); }, 40);
+    };
+    img.onerror = () => {
+      if (token !== this.reqToken) return;
+      this.setState({ busy: false });
+      this.avisar('A imagem desta obra não quis sair do depósito. Tente outra.');
+    };
+    img.src = obra.primaryImageSmall;
+    this.pushHistoria(obra);
+    this.analisar(obra);
+  }
+
+  pushHistoria(obra) {
+    const h = this.state.history.filter(x => x.id !== obra.objectID);
+    h.unshift({ id: obra.objectID, titulo: obra.title || 'Sem título', thumb: obra.primaryImageSmall });
+    this.setState({ history: h.slice(0, 14) });
+  }
+  revisitar(id) {
+    if (this.state.busy) return;
+    const o = this.objCache.get(id);
+    if (!o) return;
+    const token = ++this.reqToken;
+    this.mostrarObra(o, token);
+  }
+
+  // ---------- IA (Gemini com chave; Claude como fallback de demonstração) ----------
+  temProvedor() { return !!(this.state.geminiKey || (window.claude && window.claude.complete)); }
+  montarPrompt(obra, nivel, foco) {
+    const nivelTxt = {
+      'criança': 'uma criança curiosa de 8 anos',
+      'leigo': 'um adulto leigo em arte',
+      'conhecedor': 'um conhecedor exigente de história da arte'
+    }[nivel] || nivel;
+    let extras = '';
+    if (obra.department) extras += ', departamento de ' + obra.department;
+    if (obra.culture) extras += ', cultura ' + obra.culture;
+    return "Você é um guia carismático de uma galeria de arte. Explique a obra '" + (obra.title || 'sem título') + "' de " + (obra.artistDisplayName || 'artista desconhecido') + " (" + (obra.objectDate || 'data desconhecida') + ", " + (obra.medium || 'técnica desconhecida') + extras + ") para " + nivelTxt + ", focando em " + foco + ". Responda em português do Brasil, entre 3 e 5 frases curtas e vivas. Sem asteriscos, sem markdown, sem listas.";
+  }
+  async pedirIA(prompt) {
+    if (this.state.geminiKey) {
+      const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + this.MODEL + ':generateContent?key=' + this.state.geminiKey;
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok) throw new Error((d && d.error && d.error.message) || ('HTTP ' + r.status));
+      const t = d && d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts && d.candidates[0].content.parts[0] && d.candidates[0].content.parts[0].text;
+      if (!t) throw new Error('resposta vazia');
+      return t;
+    }
+    if (window.claude && window.claude.complete) return await window.claude.complete(prompt);
+    throw new Error('sem-provedor');
+  }
+  limpar(t) { return String(t).replace(/\*/g, '').trim(); }
+
+  async analisar(obra, opts) {
+    const nivel = (opts && opts.nivel) || this.state.nivel;
+    const foco = (opts && opts.foco) || this.state.foco;
+    const chave = obra.objectID + '|' + nivel + '|' + foco;
+    if (this.anCache.has(chave)) {
+      this.anToken++;
+      this.setState({ analysis: this.anCache.get(chave), analysisLoading: false, analysisErro: '' });
+      return;
+    }
+    if (!this.temProvedor()) {
+      this.anToken++;
+      this.setState({ analysis: '', analysisLoading: false, analysisErro: 'sem-provedor' });
+      return;
+    }
+    const token = ++this.anToken;
+    this.setState({ analysisLoading: true, analysisErro: '', analysis: '' });
+    try {
+      const texto = this.limpar(await this.pedirIA(this.montarPrompt(obra, nivel, foco)));
+      if (token !== this.anToken) return;
+      this.anCache.set(chave, texto);
+      this.setState({ analysis: texto, analysisLoading: false });
+    } catch (e) {
+      if (token !== this.anToken) return;
+      this.setState({ analysisLoading: false, analysisErro: (e && e.message === 'sem-provedor') ? 'sem-provedor' : 'erro' });
+    }
+  }
+
+  comparar() {
+    const obra = this.state.obra;
+    if (!obra) return;
+    this.setState({ compare: true });
+    const foco = this.state.foco;
+    [['criança', 'cmpA'], ['conhecedor', 'cmpB']].forEach(async (par) => {
+      const nv = par[0], slot = par[1];
+      const chave = obra.objectID + '|' + nv + '|' + foco;
+      if (this.anCache.has(chave)) {
+        this.setState({ [slot]: this.anCache.get(chave), [slot + 'L']: false, [slot + 'E']: false });
+        return;
+      }
+      if (!this.temProvedor()) { this.setState({ [slot]: '', [slot + 'L']: false, [slot + 'E']: true }); return; }
+      this.setState({ [slot + 'L']: true, [slot]: '', [slot + 'E']: false });
+      try {
+        const t = this.limpar(await this.pedirIA(this.montarPrompt(obra, nv, foco)));
+        this.anCache.set(chave, t);
+        this.setState({ [slot]: t, [slot + 'L']: false });
+      } catch (e) {
+        this.setState({ [slot + 'L']: false, [slot + 'E']: true });
+      }
+    });
+  }
+
+  // ---------- Zoom ----------
+  abrirZoom() {
+    const o = this.state.obra;
+    if (!o || !this.state.imgSrc) return;
+    this.setState({ zoom: true, zoomSrc: this.state.imgSrc, zoomBlur: true, zoomScale: 1, zoomOrigin: '50% 50%' });
+    const alta = o.primaryImage || o.primaryImageSmall;
+    const img = new Image();
+    img.referrerPolicy = 'no-referrer';
+    img.onload = () => { if (this.state.zoom) this.setState({ zoomSrc: alta, zoomBlur: false }); };
+    img.onerror = () => { this.setState({ zoomBlur: false }); };
+    img.src = alta;
+  }
+
+  // ---------- Portão ----------
+  async validarChave(ch) {
+    try {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(ch));
+      return r.ok;
+    } catch (e) { return false; }
+  }
+  async entrar() {
+    const ch = this.state.keyInput.trim();
+    if (!ch) { this.setState({ keyError: 'Cole uma chave primeiro.' }); return; }
+    this.setState({ validating: true, keyError: '' });
+    const ok = await this.validarChave(ch);
+    if (ok) {
+      try { localStorage.setItem('ma_gemini_key', ch); localStorage.removeItem('ma_demo'); } catch (e) {}
+      this.setState({ geminiKey: ch, validating: false, demo: false, keyError: '' });
+      this.abrirPortas();
+    } else {
+      this.setState({ validating: false, keyError: 'Chave inválida. Confira no Google AI Studio e tente de novo.' });
+    }
+  }
+  visitante() {
+    try { localStorage.setItem('ma_demo', '1'); } catch (e) {}
+    this.setState({ demo: true });
+    this.abrirPortas();
+  }
+  // Remove a chave/modo salvos neste navegador e volta pra bilheteria.
+  sair() {
+    try { localStorage.removeItem('ma_gemini_key'); localStorage.removeItem('ma_demo'); } catch (e) {}
+    this.setState({ geminiKey: '', demo: false, keyInput: '', keyError: '', phase: 'gate' });
+  }
+  abrirPortas() {
+    this.setState({ phase: 'opening' });
+    const dur = this.teatral() ? 950 : 200;
+    setTimeout(() => {
+      this.setState({ phase: 'hall' });
+      if (!this.state.obra) this.surpresa();
+    }, dur);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const teatral = this.teatral();
+    const tom = this.props.tomDaParede ?? 'carvao-verde';
+    const spot = this.props.spotlight ?? 0.7;
+    const tons = {
+      'carvao-verde': { base: '#191c17', alto: '#242822' },
+      'carvao-quente': { base: '#1d1915', alto: '#282219' },
+      'grafite': { base: '#17181b', alto: '#212229' }
+    }[tom] || { base: '#191c17', alto: '#242822' };
+
+    const paredeFundo = {
+      position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+      backgroundColor: tons.base,
+      backgroundImage:
+        'repeating-linear-gradient(45deg, rgba(207,169,100,0.028) 0px 1px, transparent 1px 26px),' +
+        'repeating-linear-gradient(-45deg, rgba(207,169,100,0.028) 0px 1px, transparent 1px 26px),' +
+        'radial-gradient(ellipse 130% 85% at 50% -18%, ' + tons.alto + ' 0%, transparent 58%),' +
+        'linear-gradient(180deg, ' + tons.base + ' 0%, #0c0e0b 100%)'
+    };
+    const spotStyle = {
+      position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: spot,
+      background: 'radial-gradient(ellipse 48% 36% at 50% 12%, rgba(226,196,138,0.13) 0%, transparent 72%)'
+    };
+
+    const o = s.obra;
+    const fichaRows = [];
+    if (o) {
+      let artista = o.artistDisplayName || 'Artista desconhecido';
+      if (o.artistDisplayBio) artista += ' (' + o.artistDisplayBio + ')';
+      const pares = [
+        ['ARTISTA', artista],
+        ['DATA', o.objectDate],
+        ['TÉCNICA', o.medium],
+        ['DEPARTAMENTO', o.department],
+        ['CULTURA', o.culture]
+      ];
+      pares.forEach(p => { if (p[1]) fichaRows.push({ k: p[0], v: p[1] }); });
+    }
+
+    const veilOn = s.busy || (o && !s.imgVisible);
+    const dur = teatral ? [900, 1800] : [150, 200];
+
+    const historia = s.history.map(h => ({
+      ...h,
+      click: () => this.revisitar(h.id),
+      bg: {
+        width: '100%', height: '100%', display: 'block',
+        backgroundImage: 'url("' + h.thumb + '")',
+        backgroundSize: 'cover', backgroundPosition: 'center'
+      },
+      estilo: {
+        flex: '0 0 auto', width: '44px', height: '44px', padding: 0, cursor: 'pointer', overflow: 'hidden',
+        borderRadius: '2px',
+        border: (o && h.id === o.objectID) ? '1px solid #dcb672' : '1px solid rgba(207,169,100,0.3)',
+        boxShadow: (o && h.id === o.objectID) ? '0 0 10px rgba(220,182,114,0.35)' : '0 3px 8px rgba(0,0,0,0.35)',
+        background: '#22251f',
+        opacity: (o && h.id === o.objectID) ? 1 : 0.8,
+        transition: 'opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease'
+      }
+    }));
+
+    const semIA = !this.temProvedor();
+    const nivelNomes = { 'criança': 'criança', 'leigo': 'leigos', 'conhecedor': 'conhecedores' };
+
+    return {
+      // ambiente
+      paredeFundo, spotStyle,
+      // portão
+      mostrarPortao: s.phase !== 'hall',
+      portaoOverlayStyle: {
+        position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px', overflowY: 'auto',
+        background: 'radial-gradient(ellipse at 50% 30%, rgba(20,23,18,0.9), rgba(6,7,5,0.97))',
+        backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)',
+        opacity: s.phase === 'opening' ? 0 : 1,
+        pointerEvents: s.phase === 'opening' ? 'none' : 'auto',
+        transition: 'opacity ' + (teatral ? 900 : 180) + 'ms ease'
+      },
+      portaoCardAnim: {
+        width: '100%', maxWidth: '420px', margin: 'auto',
+        transform: s.phase === 'opening' ? (teatral ? 'translateY(44px) scale(0.97)' : 'none') : 'none',
+        transition: 'transform 900ms cubic-bezier(0.55, 0, 0.6, 1)'
+      },
+      keyInput: s.keyInput,
+      aoDigitarChave: (e) => this.setState({ keyInput: e.target.value }),
+      aoTeclaChave: (e) => { if (e.key === 'Enter') this.entrar(); },
+      aoEntrar: () => this.entrar(),
+      aoVisitante: () => this.visitante(),
+      aoSair: () => this.sair(),
+      temSessao: !!(s.geminiKey || s.demo),
+      validando: s.validating,
+      naoValidando: !s.validating,
+      keyError: s.keyError,
+      // ficha
+      fichaEsqueleto: s.busy && !o,
+      fichaVazia: !s.busy && !o,
+      temObra: !!o,
+      tituloObra: o ? (o.title || 'Sem título') : '',
+      fichaRows,
+      temMetUrl: !!(o && o.objectURL),
+      metUrl: o ? (o.objectURL || '') : '',
+      // moldura
+      temImg: !!s.imgSrc,
+      imgSrc: s.imgSrc,
+      imgStyle: {
+        position: 'absolute', inset: '12px', cursor: 'zoom-in',
+        backgroundImage: s.imgSrc ? 'url("' + s.imgSrc + '")' : 'none',
+        backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
+        filter: 'drop-shadow(0 4px 10px rgba(40,30,10,0.3))',
+        opacity: s.imgVisible ? 1 : 0,
+        transform: s.imgVisible ? 'scale(1)' : 'scale(1.035)',
+        transition: 'opacity ' + dur[0] + 'ms ease, transform ' + dur[1] + 'ms cubic-bezier(0.19, 0.6, 0.22, 1)'
+      },
+      veilStyle: {
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse at 50% 38%, rgba(14,15,12,0.3), rgba(8,9,7,0.6))',
+        opacity: veilOn ? 1 : 0,
+        transition: 'opacity ' + (teatral ? 650 : 150) + 'ms ease'
+      },
+      mostrarAviso: !o && !s.busy,
+      plateTitulo: o ? (o.title || 'Sem título') : '',
+      plateSub: o ? ((o.artistDisplayName || 'Artista desconhecido') + (o.objectDate ? ' · ' + o.objectDate : '')) : '',
+      abrirZoom: () => this.abrirZoom(),
+      // análise
+      analiseEsqueleto: s.analysisLoading,
+      temAnalise: !!s.analysis && !s.analysisLoading,
+      analysisTexto: s.analysis,
+      analiseVazia: !s.analysis && !s.analysisLoading && !s.analysisErro && !o,
+      analiseSemIA: (s.analysisErro === 'sem-provedor') || (!!o && !s.analysis && !s.analysisLoading && !s.analysisErro && semIA),
+      analiseErroGen: s.analysisErro === 'erro',
+      tentarAnalise: () => { if (o) this.analisar(o); },
+      abrirPortaoNovamente: () => this.setState({ phase: 'gate' }),
+      aoComparar: () => this.comparar(),
+      compararDesabilitado: !o,
+      nivelFocoLabel: 'para ' + (nivelNomes[s.nivel] || s.nivel) + ' · ' + s.foco,
+      provedorLabel: s.geminiKey ? 'GEMINI' : ((window.claude && window.claude.complete) ? 'CLAUDE · DEMO' : 'SEM IA'),
+      // busca
+      searchTerm: s.searchTerm,
+      aoDigitarBusca: (e) => this.setState({ searchTerm: e.target.value }),
+      aoTeclaBusca: (e) => { if (e.key === 'Enter') this.buscar(s.searchTerm.trim()); },
+      aoSurpresa: () => this.surpresa(),
+      buscando: s.busy,
+      naoBuscando: !s.busy,
+      temMais: s.lastIds.length > 0,
+      aoOutra: () => this.outra(),
+      nivel: s.nivel,
+      foco: s.foco,
+      aoMudarNivel: (e) => {
+        const v = e.target.value;
+        this.setState({ nivel: v });
+        if (o) this.analisar(o, { nivel: v });
+      },
+      aoMudarFoco: (e) => {
+        const v = e.target.value;
+        this.setState({ foco: v });
+        if (o) this.analisar(o, { foco: v });
+      },
+      // história
+      temHistoria: historia.length > 0,
+      historia,
+      // zoom
+      zoomAberto: s.zoom,
+      zoomSrc: s.zoomSrc,
+      zoomCarregandoAlta: s.zoom && s.zoomBlur,
+      zoomImgStyle: {
+        width: 'min(94vw, 1500px)', height: 'min(80vh, 1100px)',
+        backgroundImage: s.zoomSrc ? 'url("' + s.zoomSrc + '")' : 'none',
+        backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
+        filter: s.zoomBlur ? 'blur(10px)' : 'none',
+        transform: 'scale(' + s.zoomScale + ')',
+        transformOrigin: s.zoomOrigin,
+        transition: 'filter 500ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1)',
+        cursor: s.zoomScale > 1 ? 'zoom-out' : 'zoom-in'
+      },
+      zoomLegenda: o ? ((o.title || 'Sem título') + ' — ' + (o.artistDisplayName || 'Artista desconhecido') + (o.objectDate ? ', ' + o.objectDate : '')) : '',
+      fecharZoom: () => this.setState({ zoom: false }),
+      cliqueZoomImg: (e) => {
+        e.stopPropagation();
+        const r = e.currentTarget.getBoundingClientRect();
+        const ox = ((e.clientX - r.left) / r.width * 100).toFixed(1) + '% ';
+        const oy = ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%';
+        this.setState({ zoomScale: s.zoomScale > 1 ? 1 : 2.2, zoomOrigin: ox + oy });
+      },
+      // comparação
+      compareAberto: s.compare,
+      fecharCompare: () => this.setState({ compare: false }),
+      pararClique: (e) => e.stopPropagation(),
+      compareLegenda: (o ? ('“' + (o.title || 'Sem título') + '”') : '') + ' · foco em ' + s.foco,
+      compareCols: [
+        { titulo: 'PARA UMA CRIANÇA', texto: s.cmpA, carregando: s.cmpAL, pronto: !!s.cmpA && !s.cmpAL, erro: s.cmpAE },
+        { titulo: 'PARA CONHECEDORES', texto: s.cmpB, carregando: s.cmpBL, pronto: !!s.cmpB && !s.cmpBL, erro: s.cmpBE }
+      ],
+      // toast
+      temToast: !!s.toast,
+      toast: s.toast
+    };
+  }
+}
+</script>
 </body>
-
 </html>
